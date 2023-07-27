@@ -1,0 +1,35 @@
+on:
+  issue_comment:
+    types:
+      - created
+jobs:
+  openshift-tests:
+    # This job only runs for '[test-all]' or '[test-openshift] pull request comments by owner, member
+    name: "${{ matrix.test_case }}tests: ${{ matrix.version }} - ${{ matrix.os_test }}"
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [ "14", "14-minimal", "16", "16-minimal", "18", "18-minimal" ]
+        os_test: [ "centos7", "rhel7", "rhel8", "rhel9"]
+        test_case: [ "openshift-3", "openshift-4" ]
+        exclude:
+          - test_case: "openshift-4"
+            os_test: "centos7"
+          - test_case: "openshift-3"
+            os_test: "rhel8"
+          - test_case: "openshift-3"
+            os_test: "rhel9"
+
+    if: |
+      github.event.issue.pull_request
+      && (contains(github.event.comment.body, '[test-openshift]') || contains(github.event.comment.body, '[test-all]'))
+      && contains(fromJson('["OWNER", "MEMBER"]'), github.event.comment.author_association)
+    steps:
+      - uses: sclorg/tfaga-wrapper@main
+        with:
+          os_test: ${{ matrix.os_test }}
+          version: ${{ matrix.version }}
+          test_case: ${{ matrix.test_case }}
+          public_api_key: ${{ secrets.TF_PUBLIC_API_KEY }}
+          private_api_key: ${{ secrets.TF_INTERNAL_API_KEY }}
