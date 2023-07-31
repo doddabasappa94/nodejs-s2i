@@ -87,11 +87,11 @@ else
 
 	echo "---> Installing all dependencies"
 	NODE_ENV=development npm install
-
+      if [ ! -z $NPM_BUILD ]; then  
 	#do not fail when there is no build script
 	echo "---> Building in production mode"
 	$NPM_BUILD --if-present
-
+      fi
 	echo "---> Pruning the development dependencies"
 	npm prune
 
