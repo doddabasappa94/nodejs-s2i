@@ -87,11 +87,13 @@ else
 
 	echo "---> Installing all dependencies"
 	NODE_ENV=development npm install
-      if [ ! -z $NPM_BUILD ]; then  
-	#do not fail when there is no build script
-	echo "---> Building in production mode"
-	$NPM_BUILD --if-present
-      fi
+
+     if [ -n "$NPM_BUILD" ]; then
+        echo "---> Building in production mode"
+        $NPM_BUILD
+     else
+      echo "NPM_BUILD environment variable not set or It is a node-api so build is not requirred"
+     fi
 	echo "---> Pruning the development dependencies"
 	npm prune
 
